@@ -81,7 +81,7 @@ import sys
 import traceback
 
 from caom2pipe import run_composable as rc
-from blank2caom2 import APPLICATION, BlankName
+from phangs2caom2 import APPLICATION, PHANGSName
 
 
 META_VISITORS = []
