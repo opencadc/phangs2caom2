@@ -66,8 +66,8 @@
 #
 # ***********************************************************************
 #
-from blank2caom2 import BlankName
+from phangs2caom2 import PHANGSName
 
 
 def test_is_valid():
-    assert BlankName('anything').is_valid()
+    assert PHANGSName('anything').is_valid()
