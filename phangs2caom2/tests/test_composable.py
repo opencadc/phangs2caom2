@@ -72,7 +72,7 @@ import test_main_app
 
 from mock import Mock, patch
 
-from phangs2caom2 import composable, PHANGSName
+from phangs2caom2 import composable, PHANGSName, COLLECTION
 
 
 def test_run_by_state():
@@ -81,8 +81,8 @@ def test_run_by_state():
 
 @patch('caom2pipe.execute_composable.OrganizeExecutesWithDoOne.do_one')
 def test_run(run_mock):
-    test_obs_id = 'TEST_OBS_ID'
-    test_f_id = 'test_file_id'
+    test_obs_id = 'test_obs_id'
+    test_f_id = test_obs_id
     test_f_name = f'{test_f_id}.fits'
     getcwd_orig = os.getcwd
     os.getcwd = Mock(return_value=test_main_app.TEST_DATA_DIR)
@@ -100,6 +100,14 @@ def test_run(run_mock):
             'wrong fname on disk'
         assert test_storage.url is None, 'wrong url'
         assert test_storage.lineage == \
-            f'{test_f_id}/ad:phangs/{test_f_name}', 'wrong lineage'
+            f'{test_storage.product_id}/ad:{COLLECTION}/{test_f_name}', \
+            'wrong lineage'
     finally:
         os.getcwd = getcwd_orig
+        # clean up the summary report text file
+        fqn = f'{test_main_app.TEST_DATA_DIR}/data_report.txt'
+        if os.path.exists(fqn):
+            os.unlink(fqn)
+        rejected_fqn = f'{test_main_app.TEST_DATA_DIR}/rejected.yml'
+        if os.path.exists(rejected_fqn):
+            os.unlink(rejected_fqn)

@@ -78,7 +78,9 @@ import os
 import sys
 import traceback
 
-from caom2 import Observation
+from math import sqrt
+
+from caom2 import Observation, DataProductType, CalibrationLevel
 from caom2utils import ObsBlueprint, get_gen_proc_arg_parser, gen_proc
 from caom2pipe import manage_composable as mc
 
@@ -100,12 +102,31 @@ class PHANGSName(mc.StorageName):
 
     PHANGS_NAME_PATTERN = '*'
 
-    def __init__(self, obs_id=None, fname_on_disk=None, file_name=None,
-                 entry=None):
-        self.fname_in_ad = file_name
+    def __init__(self, obs_id=None, file_name=None, entry=None,
+                 artifact_uri=None):
+        if file_name:
+            self.fname_in_ad = file_name
+            super(PHANGSName, self).__init__(
+                obs_id, COLLECTION, PHANGSName.PHANGS_NAME_PATTERN,
+                fname_on_disk=file_name, compression='', entry=entry)
+        elif artifact_uri:
+            scheme, path, file_name = mc.decompose_uri(artifact_uri)
         super(PHANGSName, self).__init__(
             obs_id, COLLECTION, PHANGSName.PHANGS_NAME_PATTERN,
-            fname_on_disk, entry=entry)
+            fname_on_disk=file_name, compression='', entry=entry)
+        self._file_id = mc.StorageName.remove_extensions(file_name)
+        self._obs_id = self.file_id
+
+    @property
+    def file_id(self):
+        return self._file_id
+
+    @property
+    def product_id(self):
+        result = 'spectral_line_data_cube'
+        if 'derived' in self.file_name:
+            result = 'image_intensity_map'
+        return result
 
     def is_valid(self):
         return True
@@ -115,11 +136,44 @@ def accumulate_bp(bp, uri):
     """Configure the telescope-specific ObsBlueprint at the CAOM model 
     Observation level."""
     logging.debug('Begin accumulate_bp.')
-    bp.configure_position_axes((1,2))
-    bp.configure_time_axis(3)
-    bp.configure_energy_axis(4)
-    bp.configure_polarization_axis(5)
-    bp.configure_observable_axis(6)
+    bp.configure_position_axes((1, 2))
+    bp.configure_energy_axis(3)
+
+    bp.clear('Observation.telescope.name')
+    bp.add_fits_attribute('Observation.telescope.name', 'TELESCOP')
+    bp.set('Observation.telescope.geoLocationX', 2225015.30883296)
+    bp.set('Observation.telescope.geoLocationY', -5440016.41799762)
+    bp.set('Observation.telescope.geoLocationZ', -2481631.27428014)
+
+    data_product_type = DataProductType.CUBE
+    calibration_level = CalibrationLevel.PRODUCT
+    if 'derived' in uri:
+        # I'm sure this is wrong
+        data_product_type = DataProductType.MEASUREMENTS
+        calibration_level = CalibrationLevel.ANALYSIS_PRODUCT
+
+    bp.set('Plane.calibrationLevel', calibration_level)
+    bp.set('Plane.dataProductType', data_product_type)
+    bp.clear('Plane.dataRelease')
+    bp.add_fits_attribute('Plane.dataRelease', 'DATE')
+    bp.clear('Plane.metaRelease')
+    bp.add_fits_attribute('Plane.metaRelease', 'DATE')
+
+    bp.clear('Plane.provenance.name')
+    bp.add_fits_attribute('Plane.provenance.name', 'ORIGIN')
+    bp.clear('Plane.provenance.lastExecuted')
+    bp.add_fits_attribute('Plane.provenance.lastExecuted', 'DATE')
+    bp.clear('Plane.provenance.producer')
+
+    # chunk level
+    bp.clear('Chunk.position.axis.function.cd11')
+    bp.clear('Chunk.position.axis.function.cd22')
+    bp.add_fits_attribute('Chunk.position.axis.function.cd11', 'CDELT1')
+    bp.set('Chunk.position.axis.function.cd12', 0.0)
+    bp.set('Chunk.position.axis.function.cd21', 0.0)
+    bp.add_fits_attribute('Chunk.position.axis.function.cd22', 'CDELT2')
+    bp.set('Chunk.position.resolution', '_get_position_resolution(header)')
+
     logging.debug('Done accumulate_bp.')
 
 
@@ -167,6 +221,15 @@ def _build_blueprints(uris):
             accumulate_bp(blueprint, uri)
         blueprints[uri] = blueprint
     return blueprints
+
+
+def _get_position_resolution(header):
+    bmaj = header.get('BMAJ')
+    bmin = header.get('BMIN')
+    # From
+    # https://open-confluence.nrao.edu/pages/viewpage.action?pageId=13697486
+    # Clare Chandler via JJK - 21-08-18
+    return 3600.0 * sqrt(bmaj*bmin)
 
 
 def _get_uris(args):

@@ -83,31 +83,26 @@ PLUGIN = os.path.join(os.path.dirname(THIS_DIR), 'main_app.py')
 
 
 def pytest_generate_tests(metafunc):
-    obs_id_list = glob.glob(f'{TEST_DATA_DIR}/*.fits.header')
+    obs_id_list = glob.glob(f'{TEST_DATA_DIR}/*.header')
     metafunc.parametrize('test_name', obs_id_list)
 
 
 @patch('caom2utils.fits2caom2.CadcDataClient')
 def test_main_app(data_client_mock, test_name):
     basename = os.path.basename(test_name)
-    extension = '.fz'
-    file_name = basename.replace('.header', extension)
-    phangs_name = PHANGSName(file_name=file_name)
+    phangs_name = PHANGSName(file_name=basename)
     obs_path = f'{TEST_DATA_DIR}/{phangs_name.obs_id}.expected.xml'
     output_file = f'{TEST_DATA_DIR}/{basename}.actual.xml'
 
     if os.path.exists(output_file):
         os.unlink(output_file)
 
-    local = _get_local(basename)
-
     data_client_mock.return_value.get_file_info.side_effect = _get_file_info
 
     sys.argv = \
-        (f'{APPLICATION} --no_validate '
-         f'--local {local} --observation {COLLECTION} {phangs_name.obs_id} -o '
-         f'{output_file} --plugin {PLUGIN} --module {PLUGIN} --lineage '
-         f'{_get_lineage(phangs_name)}'
+        (f'{APPLICATION} --no_validate --local {test_name} --observation '
+         f'{COLLECTION} {phangs_name.obs_id} -o {output_file} --plugin '
+         f'{PLUGIN} --module {PLUGIN} --lineage {phangs_name.lineage}'
          ).split()
     print(sys.argv)
     try:
@@ -125,12 +120,6 @@ def test_main_app(data_client_mock, test_name):
 
 def _get_file_info(archive, file_id):
     return {'type': 'application/fits'}
-
-
-def _get_lineage(blank_name):
-    result = mc.get_lineage(ARCHIVE, blank_name.product_id,
-                            f'{blank_name.file_name}')
-    return result
 
 
 def _get_local(obs_id):
