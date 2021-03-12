@@ -141,14 +141,6 @@ class PHANGSName(mc.StorageName):
                f'file_id {self._file_id}'
 
     @property
-    def algorithm_name(self):
-        return self._algorithm_name
-
-    @property
-    def energy_transition(self):
-        return self._energy_transition
-
-    @property
     def file_id(self):
         return self._file_id
 
@@ -188,19 +180,15 @@ class PHANGSName(mc.StorageName):
         }
         bits = self._file_id.split('_')
         self._obs_id = f'{bits[0]}_{bits[1]}_{bits[2]}'
-        self._algorithm_name = f'{bits[2]}_datacube'
-        if len(bits) >= 4:
-            self._algorithm_name = ''.join(ii for ii in bits[3:])
-        self._energy_transition = bits[2]
         self._target_name = bits[0]
+
         self._telescope = telescope_lookup.get(bits[1])
-
-        # ER - original emails
-        self._product_id = self._file_id
-
         if self._telescope is None:
             raise mc.CadcException(
                 f'Unexpected telescope value in {self._file_id}')
+
+        # ER - original emails
+        self._product_id = self._file_id
 
 
 def accumulate_bp(bp, uri):
@@ -215,7 +203,9 @@ def accumulate_bp(bp, uri):
 
     # all DerivedObservations, even though members are unknown at CADC
     bp.set('DerivedObservation.members', {})
-    bp.set('Observation.algorithm.name', storage_name.algorithm_name)
+    # TBD - there are many more values than this, so maybe there should be
+    # many more observations than this?
+    bp.set('Observation.algorithm.name', 'phangs_imaging')
 
     if 'ALMA' in storage_name.telescope:
         # ER 15-10-20
@@ -237,10 +227,11 @@ def accumulate_bp(bp, uri):
 
     data_product_type = DataProductType.CUBE
     calibration_level = CalibrationLevel.PRODUCT
-    if 'mom' in uri:
-        # ER 4-10-20
-        # IMAGE -- These are 2D image-like maps of the galaxy so are most
-        # IMAGE like.
+    if '_strict_' in uri or '_broad_' in uri:
+        # ER 05-03-21
+        # everything with a "_strict_" or "_broad_" in the filename as an
+        # image (these should also have NAXIS=2 in the header). Everything
+        # else should be "cube" with NAXIS=3.
         data_product_type = DataProductType.IMAGE
 
     bp.set('Plane.calibrationLevel', calibration_level)
@@ -257,12 +248,6 @@ def accumulate_bp(bp, uri):
         artifact_product_type = ProductType.CALIBRATION
     bp.set('Artifact.productType', artifact_product_type)
 
-    # bp.clear('Plane.provenance.name')
-    # bp.add_fits_attribute('Plane.provenance.name', 'ORIGIN')
-    # bp.clear('Plane.provenance.lastExecuted')
-    # bp.add_fits_attribute('Plane.provenance.lastExecuted', 'DATE')
-    # bp.clear('Plane.provenance.producer')
-
     # chunk level
     # position
     bp.clear('Chunk.position.axis.function.cd11')
@@ -274,8 +259,10 @@ def accumulate_bp(bp, uri):
     bp.set('Chunk.position.resolution', '_get_position_resolution(header)')
 
     # energy
-    bp.set('Chunk.energy.transition.species', storage_name.energy_transition)
-    bp.set('Chunk.energy.transition.transition', 'TBD')
+    bp.clear('Chunk.energy.transition.species')
+    bp.add_fits_attribute('Chunk.energy.transition.species', 'MOLECULE')
+    bp.clear('Chunk.energy.transition.transition')
+    bp.add_fits_attribute('Chunk.energy.transition.transition', 'TRANSITI')
 
     # observable
     bp.clear('Chunk.observable.dependent.axis.ctype')
@@ -350,7 +337,8 @@ def _get_uris(args):
     result = []
     if args.lineage:
         for ii in args.lineage:
-            result.append(ii.split('/', 1)[1])
+            ignore_product_id, uri = mc.decompose_lineage(ii)
+            result.append(uri)
     elif args.local:
         for ii in args.local:
             file_id = mc.StorageName.remove_extensions(os.path.basename(ii))
@@ -378,8 +366,10 @@ def _update_from_comment(observation, phangs_name, headers):
     # - Update to reference when accepted
     # COMMENT Release generated at 2021-03-04T07:28:10.245340
     # - Provenance.lastExecuted
-    # COMMENT Data from ALMA Proposal ID 2017.1.00886.L
+    # COMMENT Data from ALMA Proposal ID: 2017.1.00886.L
     # - Proposal.proposalID
+    # COMMENT ALMA Proposal PI: Schinnerer, Eva
+    # - Proposal.pi_name
     # COMMENT Observed in MJD interval [58077.386275,58081.464121]
     # COMMENT Observed in MJD interval [58290.770032,58365.629222]
     # COMMENT Observed in MJD interval [58037.515807,58047.541173]
@@ -414,11 +404,12 @@ def _update_from_comment(observation, phangs_name, headers):
             elif 'Release generated at ' in entry:
                 plane.provenance.last_executed = mc.make_time_tz(
                     entry.split(' at ')[1])
-            elif 'Data from ALMA ProposalID ' in entry:
-                if observation.proposal is None:
-                    observation.proposal = Proposal(entry.split(' ID ')[1])
-            # elif 'Canonical Reference: ' in entry:
-            #     plane.provenance.reference = entry.split(': ')[1]
+            elif 'Data from ALMA Proposal ID:' in entry:
+                observation.proposal = Proposal(entry.split(':')[1].strip())
+            elif 'Canonical Reference: ' in entry:
+                plane.provenance.producer = entry.split(': ')[1]
+            elif 'ALMA Proposal PI:' in entry:
+                observation.proposal.pi_name = entry.split(': ')[1]
             elif 'Observed in MJD interval ' in entry:
                 if chunk is not None:
                     bits = entry.split()[4].split(',')
