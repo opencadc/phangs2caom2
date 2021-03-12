@@ -72,14 +72,14 @@ import test_main_app
 
 from mock import Mock, patch
 
-from phangs2caom2 import composable, PHANGSName, COLLECTION
+from phangs2caom2 import composed, PHANGSName, COLLECTION
 
 
 def test_run_by_state():
     pass
 
 
-@patch('caom2pipe.execute_composable.OrganizeExecutesWithDoOne.do_one')
+@patch('caom2pipe.execute_composable.OrganizeExecutes.do_one')
 def test_run(run_mock):
     test_obs_id = 'test_obs_id'
     test_f_id = test_obs_id
@@ -88,7 +88,7 @@ def test_run(run_mock):
     os.getcwd = Mock(return_value=test_main_app.TEST_DATA_DIR)
     try:
         # execution
-        composable._run()
+        composed._run()
         assert run_mock.called, 'should have been called'
         args, kwargs = run_mock.call_args
         test_storage = args[0]

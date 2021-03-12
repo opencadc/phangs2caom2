@@ -70,4 +70,14 @@ from phangs2caom2 import PHANGSName
 
 
 def test_is_valid():
-    assert PHANGSName(file_name='anything').is_valid()
+    assert PHANGSName(
+        file_name='ngc5236_7m+tp_co21_pbcorr_trimmed_k.fits').is_valid()
+
+
+def test_bits():
+    test_subject = PHANGSName(file_name='ngc5236_7m+tp_co21_broad_mom0.fits')
+    assert test_subject.target_name == 'ngc5236', 'wrong target name'
+    assert test_subject.telescope == 'ALMA-7m + ALMA-TP', 'wrong telescope'
+    assert test_subject.obs_id == 'ngc5236_7m+tp_co21', 'wrong obs id'
+    assert test_subject.product_id == 'ngc5236_7m+tp_co21_broad_mom0', \
+        'wrong product id'
