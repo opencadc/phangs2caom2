@@ -5,16 +5,4 @@ then
   cp /usr/local/bin/config.yml ${PWD}
 fi
 
-if [[ ! -e ${PWD}/state.yml ]]; then
-  if [[ "${@}" == "phangs_run_state" ]]; then
-    yesterday=$(date -d yesterday "+%d-%b-%Y %H:%M")
-    echo "bookmarks:
-    phangs_timestamp:
-      last_record: $yesterday
-" > ${PWD}/state.yml
-  else
-    cp /usr/local/bin/state.yml ${PWD}
-  fi
-fi
-
 exec "${@}"
