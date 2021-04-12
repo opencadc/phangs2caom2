@@ -70,4 +70,4 @@ from phangs2caom2 import PHANGSName
 
 
 def test_is_valid():
-    assert PHANGSName('anything').is_valid()
+    assert PHANGSName(file_name='anything').is_valid()
