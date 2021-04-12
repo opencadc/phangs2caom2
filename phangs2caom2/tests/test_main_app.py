@@ -81,18 +81,102 @@ THIS_DIR = os.path.dirname(os.path.realpath(__file__))
 TEST_DATA_DIR = os.path.join(THIS_DIR, 'data')
 PLUGIN = os.path.join(os.path.dirname(THIS_DIR), 'main_app.py')
 
+LOOKUP = {'ngc2903_12m+7m+tp_co21':
+              ['ngc2903_12m+7m+tp_co21.fits.header',
+               'ngc2903_12m+7m+tp_co21_broadmask.fits.header',
+               'ngc2903_12m+7m+tp_co21_2as.fits.header',
+               'ngc2903_12m+7m+tp_co21_noise.fits.header',
+               'ngc2903_12m+7m+tp_co21_2as_broad_emom0.fits.header',
+               'ngc2903_12m+7m+tp_co21_strict_eew.fits.header',
+               'ngc2903_12m+7m+tp_co21_2as_broad_mom0.fits.header',
+               'ngc2903_12m+7m+tp_co21_strict_emom0.fits.header',
+               'ngc2903_12m+7m+tp_co21_2as_broad_tpeak.fits.header',
+               'ngc2903_12m+7m+tp_co21_strict_emom1.fits.header',
+               'ngc2903_12m+7m+tp_co21_2as_coverage.fits.header',
+               'ngc2903_12m+7m+tp_co21_strict_emom2.fits.header',
+               'ngc2903_12m+7m+tp_co21_2as_noise.fits.header',
+               'ngc2903_12m+7m+tp_co21_strict_ew.fits.header',
+               'ngc2903_12m+7m+tp_co21_2as_strict_eew.fits.header',
+               'ngc2903_12m+7m+tp_co21_strict_mom0.fits.header',
+               'ngc2903_12m+7m+tp_co21_2as_strict_emom0.fits.header',
+               'ngc2903_12m+7m+tp_co21_strict_mom1.fits.header',
+               'ngc2903_12m+7m+tp_co21_2as_strict_emom1.fits.header',
+               'ngc2903_12m+7m+tp_co21_strict_mom2.fits.header',
+               'ngc2903_12m+7m+tp_co21_2as_strict_emom2.fits.header',
+               'ngc2903_12m+7m+tp_co21_strictmask.fits.header',
+               'ngc2903_12m+7m+tp_co21_2as_strict_ew.fits.header',
+               'ngc2903_12m+7m+tp_co21_2as_strict_mom0.fits.header',
+               'ngc2903_12m+7m+tp_co21_2as_strict_mom1.fits.header',
+               'ngc2903_12m+7m+tp_co21_2as_strict_mom2.fits.header',
+               'ngc2903_12m+7m+tp_co21_2as_strictmask.fits.header',
+               'ngc2903_12m+7m+tp_co21_broad_emom0.fits.header',
+               'ngc2903_12m+7m+tp_co21_broad_mom0.fits.header',
+               'ngc2903_12m+7m+tp_co21_broad_tpeak.fits.header',
+               ],
+          'ngc2903_7m+tp_co21':
+            ['ngc2903_7m+tp_co21_11as_strict_emom0.fits.header',
+             'ngc2903_7m+tp_co21_15as_strict_mom0.fits.header',
+             'ngc2903_7m+tp_co21_11as_strict_emom1.fits.header',
+             'ngc2903_7m+tp_co21_15as_strict_mom1.fits.header',
+             'ngc2903_7m+tp_co21_11as_strict_emom2.fits.header',
+             'ngc2903_7m+tp_co21_15as_strict_mom2.fits.header',
+             'ngc2903_7m+tp_co21_11as_strict_ew.fits.header',
+             'ngc2903_7m+tp_co21_15as_strictmask.fits.header',
+             'ngc2903_7m+tp_co21_11as_strict_mom0.fits.header',
+             'ngc2903_7m+tp_co21_broad_emom0.fits.header',
+             'ngc2903_7m+tp_co21_11as_strict_mom1.fits.header',
+             'ngc2903_7m+tp_co21_broad_mom0.fits.header',
+             'ngc2903_7m+tp_co21_11as_strict_mom2.fits.header',
+             'ngc2903_7m+tp_co21_broad_tpeak.fits.header',
+             'ngc2903_7m+tp_co21_11as_strictmask.fits.header',
+             'ngc2903_7m+tp_co21_broadmask.fits.header',
+             'ngc2903_7m+tp_co21_15as.fits.header',
+             'ngc2903_7m+tp_co21_noise.fits.header',
+             'ngc2903_7m+tp_co21_15as_broad_emom0.fits.header',
+             'ngc2903_7m+tp_co21_strict_eew.fits.header',
+             'ngc2903_7m+tp_co21_15as_broad_mom0.fits.header',
+             'ngc2903_7m+tp_co21_strict_emom0.fits.header',
+             'ngc2903_7m+tp_co21.fits.header',
+             'ngc2903_7m+tp_co21_15as_broad_tpeak.fits.header',
+             'ngc2903_7m+tp_co21_strict_emom1.fits.header',
+             'ngc2903_7m+tp_co21_11as.fits.header',
+             'ngc2903_7m+tp_co21_15as_coverage.fits.header',
+             'ngc2903_7m+tp_co21_strict_emom2.fits.header',
+             'ngc2903_7m+tp_co21_11as_broad_emom0.fits.header',
+             'ngc2903_7m+tp_co21_15as_noise.fits.header',
+             'ngc2903_7m+tp_co21_strict_ew.fits.header',
+             'ngc2903_7m+tp_co21_11as_broad_mom0.fits.header',
+             'ngc2903_7m+tp_co21_15as_strict_eew.fits.header',
+             'ngc2903_7m+tp_co21_strict_mom0.fits.header',
+             'ngc2903_7m+tp_co21_11as_broad_tpeak.fits.header',
+             'ngc2903_7m+tp_co21_15as_strict_emom0.fits.header',
+             'ngc2903_7m+tp_co21_strict_mom1.fits.header',
+             'ngc2903_7m+tp_co21_11as_coverage.fits.header',
+             'ngc2903_7m+tp_co21_15as_strict_emom1.fits.header',
+             'ngc2903_7m+tp_co21_strict_mom2.fits.header',
+             'ngc2903_7m+tp_co21_11as_noise.fits.header',
+             'ngc2903_7m+tp_co21_15as_strict_emom2.fits.header',
+             'ngc2903_7m+tp_co21_strictmask.fits.header',
+             'ngc2903_7m+tp_co21_11as_strict_eew.fits.header',
+             'ngc2903_7m+tp_co21_15as_strict_ew.fits.header']
+          }
+
 
 def pytest_generate_tests(metafunc):
-    obs_id_list = glob.glob(f'{TEST_DATA_DIR}/*.header')
+    # obs_id_list = glob.glob(f'{TEST_DATA_DIR}/*.header')
+    # metafunc.parametrize('test_name', obs_id_list)
+    obs_id_list = []
+    for ii in LOOKUP:
+        obs_id_list.append(ii)
     metafunc.parametrize('test_name', obs_id_list)
 
 
 @patch('caom2utils.fits2caom2.CadcDataClient')
 def test_main_app(data_client_mock, test_name):
-    basename = os.path.basename(test_name)
-    phangs_name = PHANGSName(file_name=basename)
-    obs_path = f'{TEST_DATA_DIR}/{phangs_name.obs_id}.expected.xml'
-    output_file = f'{TEST_DATA_DIR}/{basename}.actual.xml'
+    obs_path = f'{TEST_DATA_DIR}/{test_name}.expected.xml'
+    output_file = f'{TEST_DATA_DIR}/{test_name}.actual.xml'
+    local = _get_local(test_name)
+    lineage = _get_lineage(test_name)
 
     if os.path.exists(output_file):
         os.unlink(output_file)
@@ -100,9 +184,9 @@ def test_main_app(data_client_mock, test_name):
     data_client_mock.return_value.get_file_info.side_effect = _get_file_info
 
     sys.argv = \
-        (f'{APPLICATION} --no_validate --local {test_name} --observation '
-         f'{COLLECTION} {phangs_name.obs_id} -o {output_file} --plugin '
-         f'{PLUGIN} --module {PLUGIN} --lineage {phangs_name.lineage}'
+        (f'{APPLICATION} --no_validate --local {local} --observation '
+         f'{COLLECTION} {test_name} -o {output_file} --plugin '
+         f'{PLUGIN} --module {PLUGIN} --lineage {lineage}'
          ).split()
     print(sys.argv)
     try:
@@ -122,5 +206,21 @@ def _get_file_info(archive, file_id):
     return {'type': 'application/fits'}
 
 
+# def _get_local(obs_id):
+#     return f'{TEST_DATA_DIR}/{obs_id}.fits.header'
+
+
+def _get_lineage(obs_id):
+    result = ''
+    for ii in LOOKUP[obs_id]:
+        storage_name = PHANGSName(file_name=ii)
+        fits = mc.get_lineage(ARCHIVE, storage_name.product_id, ii)
+        result = f'{result } {fits}'
+    return result
+
+
 def _get_local(obs_id):
-    return f'{TEST_DATA_DIR}/{obs_id}.fits.header'
+    result = ''
+    for ii in LOOKUP[obs_id]:
+        result = f'{result} {TEST_DATA_DIR}/{ii}'
+    return result
